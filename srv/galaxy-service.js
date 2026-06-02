@@ -3,6 +3,23 @@ const cds = require('@sap/cds');
 module.exports = cds.service.impl(async function () {
   const { Spacefarers } = this.entities;
 
+  this.before('READ', Spacefarers, (req) => {
+    const search = req.query?.SELECT?.search;
+    const term = Array.isArray(search) && search.length === 1 && search[0]?.val?.trim();
+    if (!term) return;
+
+    const condition = {
+      func: 'contains',
+      args: [
+        { func: 'tolower', args: [{ ref: ['name'] }] },
+        { val: term.toLowerCase() }
+      ]
+    };
+    const where = req.query.SELECT.where;
+    req.query.SELECT.search = undefined;
+    req.query.SELECT.where = where ? ['(', ...where, ')', 'and', condition] : [condition];
+  });
+
   this.before('NEW', Spacefarers.drafts, (req) => {
     const planet = req.user?.attr?.planet;
     if (!planet) return;
