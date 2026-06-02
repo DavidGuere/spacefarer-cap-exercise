@@ -1,0 +1,4 @@
+ID;name;race_code;shipClass;hullHardening;capacity
+11111111-aaaa-bbbb-cccc-111111111111;Hyperion;Terran;Battlecruiser;120;6
+22222222-aaaa-bbbb-cccc-222222222222;Leviathan;Zerg;Organic Carrier;60;4
+33333333-aaaa-bbbb-cccc-333333333333;Void Seeker;Protoss;Void Vessel;140;7
