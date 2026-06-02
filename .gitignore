@@ -1,0 +1,9 @@
+node_modules/
+db.sqlite
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+gen/
+dist/
+.vscode/
+.DS_Store
