@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galactic Spacefarers</title>
+    <style>
+      .demoLogoutButton {
+        position: fixed;
+        top: 0.75rem;
+        right: 6.25rem;
+        z-index: 10000;
+        border: 0;
+        border-radius: 0.375rem;
+        padding: 0.45rem 0.8rem;
+        background: #0a6ed1;
+        color: #fff;
+        font: 0.875rem Arial, sans-serif;
+        cursor: pointer;
+      }
+      .demoLogoutButton:hover {
+        background: #0854a0;
+      }
+    </style>
+    <script>
+      window["sap-ushell-config"] = {
+        defaultRenderer: "fiori2",
+        renderers: {
+          fiori2: {
+            componentData: {
+              config: {
+                enableSearch: false,
+                rootIntent: "Spacefarers-display"
+              }
+            }
+          }
+        },
+        applications: {
+          "Spacefarers-display": {
+            title: "Galactic Spacefarers",
+            description: "Manage Spacefarers",
+            additionalInformation: "SAPUI5.Component=galactic.spacefarers",
+            applicationType: "URL",
+            url: "./",
+            navigationMode: "embedded"
+          }
+        }
+      };
+    </script>
+    <script
+      src="https://sapui5.hana.ondemand.com/test-resources/sap/ushell/bootstrap/sandbox.js"
+      id="sap-ushell-bootstrap"
+    ></script>
+    <script
+      src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js"
+      id="sap-ui-bootstrap"
+      data-sap-ui-libs="sap.m, sap.ushell, sap.fe.templates"
+      data-sap-ui-compatVersion="edge"
+      data-sap-ui-async="true"
+      data-sap-ui-frameOptions="allow"
+      data-sap-ui-preload="async"
+      data-sap-ui-resourceroots='{
+        "galactic.spacefarers": "./"
+      }'
+    ></script>
+    <script>
+      function applyCreateButtonDemoAccess() {
+        fetch("/demo-session")
+          .then(function (response) { return response.json(); })
+          .then(function (session) {
+            function updateCreateButtons() {
+              document.querySelectorAll("button, [role='button']").forEach(function (button) {
+                if ((button.textContent || "").trim() !== "Create") return;
+
+                if (session.canCreate) {
+                  button.removeAttribute("aria-disabled");
+                  button.removeAttribute("disabled");
+                  if (button.getAttribute("title") === "Read-only demo users cannot create Spacefarers") {
+                    button.removeAttribute("title");
+                  }
+                  button.style.pointerEvents = "";
+                  button.style.opacity = "";
+                  return;
+                }
+
+                button.setAttribute("aria-disabled", "true");
+                button.setAttribute("disabled", "disabled");
+                button.setAttribute("title", "Read-only demo users cannot create Spacefarers");
+                button.style.pointerEvents = "none";
+                button.style.opacity = "0.5";
+              });
+            }
+
+            updateCreateButtons();
+            new MutationObserver(updateCreateButtons).observe(document.body, {
+              childList: true,
+              subtree: true
+            });
+          })
+          .catch(function () {});
+      }
+
+      sap.ui.getCore().attachInit(function () {
+        sap.ushell.Container.createRendererInternal("fiori2").then(
+          function (oRenderer) {
+            oRenderer.placeAt("content");
+            applyCreateButtonDemoAccess();
+          }
+        );
+      });
+    </script>
+  </head>
+  <body class="sapUiBody" id="content">
+    <button class="demoLogoutButton" type="button" onclick="window.location.href='/logout'">
+      Logout
+    </button>
+  </body>
+</html>

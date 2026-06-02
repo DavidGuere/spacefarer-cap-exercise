@@ -1,0 +1,14 @@
+{
+  "name": "galactic-spacefarers-ui",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Fiori Elements V4 List Report + Object Page for GalaxyService.Spacefarers",
+  "scripts": {
+    "start": "fiori run --open index.html",
+    "build": "ui5 build --clean-dest",
+    "lint": "eslint webapp"
+  },
+  "devDependencies": {
+    "@sap/ux-ui5-tooling": "^1"
+  }
+}
