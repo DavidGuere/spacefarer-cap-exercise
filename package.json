@@ -1,0 +1,21 @@
+{
+  "name": "galactic-spacefarer",
+  "version": "1.0.0",
+  "description": "Galactic Spacefarer SAP CAP + Fiori Elements V4 learning exercise",
+  "main": "srv/server.js",
+  "scripts": {
+    "watch": "cds watch",
+    "test": "jest --runInBand --testPathPatterns=test/",
+    "deploy": "cds deploy --to sqlite:db.sqlite"
+  },
+  "dependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds": "^8",
+    "nodemailer": "^6"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^8",
+    "axios": "^1.16.1",
+    "jest": "^30.4.2"
+  }
+}

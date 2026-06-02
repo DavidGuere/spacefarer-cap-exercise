@@ -1,0 +1,24 @@
+{
+  "requires": {
+    "auth": {
+      "kind": "mocked",
+      "users": {
+        "terran-admin": { "password": "admin", "roles": ["admin"], "attr": { "planet": "EARTH" } },
+        "zerg-admin":   { "password": "admin", "roles": ["admin"], "attr": { "planet": "ZERG" } },
+        "protos-admin": { "password": "admin", "roles": ["admin"], "attr": { "planet": "PROTOS" } },
+        "terran-user":  { "password": "user",  "roles": [],        "attr": { "planet": "EARTH" } },
+        "zerg-user":    { "password": "user",  "roles": [],        "attr": { "planet": "ZERG" } },
+        "protos-user":  { "password": "user",  "roles": [],        "attr": { "planet": "PROTOS" } }
+      }
+    },
+    "db":        { "kind": "sqlite", "credentials": { "url": "db.sqlite" } },
+    "messaging": { "kind": "local-messaging" }
+  },
+  "[production]": {
+    "requires": {
+      "auth":      { "kind": "xsuaa" },
+      "db":        { "kind": "hana" },
+      "messaging": { "kind": "enterprise-messaging" }
+    }
+  }
+}
