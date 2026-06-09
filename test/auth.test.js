@@ -2,12 +2,12 @@ const cds = require('@sap/cds');
 const crypto = require('crypto');
 const { GET, POST } = cds.test(__dirname + '/..');
 
-async function createSpacefarer (entry) {
-  const draft = await POST('/galaxy/Spacefarers', entry,
+async function createAndActivateSpacefarer (spacefarerPayload) {
+  const draftCreationResponse = await POST('/galaxy/Spacefarers', spacefarerPayload,
     { auth: { username: 'terran-admin', password: 'admin' } });
 
   return POST(
-    `/galaxy/Spacefarers(ID=${draft.data.ID},IsActiveEntity=false)/GalaxyService.draftActivate`,
+    `/galaxy/Spacefarers(ID=${draftCreationResponse.data.ID},IsActiveEntity=false)/GalaxyService.draftActivate`,
     {}, { auth: { username: 'terran-admin', password: 'admin' } }
   );
 }
@@ -19,77 +19,77 @@ describe('GalaxyService authorization and planet isolation', () => {
   });
 
   test('returns only the signed-in planet in Planets value help', async () => {
-    const terran = await GET('/galaxy/Planets',
+    const terranPlanetsResponse = await GET('/galaxy/Planets',
       { auth: { username: 'terran-admin', password: 'admin' } });
-    const zerg = await GET('/galaxy/Planets',
+    const zergPlanetsResponse = await GET('/galaxy/Planets',
       { auth: { username: 'zerg-admin', password: 'admin' } });
 
-    expect(terran.data.value).toEqual([
+    expect(terranPlanetsResponse.data.value).toEqual([
       expect.objectContaining({ code: 'EARTH', name: 'Earth' })
     ]);
-    expect(zerg.data.value).toEqual([
+    expect(zergPlanetsResponse.data.value).toEqual([
       expect.objectContaining({ code: 'ZERG', name: 'Zerg Planet' })
     ]);
   });
 
   test('pre-fills only origin_code from the signed-in user planet when creating a draft', async () => {
-    const { data } = await POST('/galaxy/Spacefarers', {},
+    const { data: draftData } = await POST('/galaxy/Spacefarers', {},
       { auth: { username: 'terran-admin', password: 'admin' } });
 
-    expect(data).toMatchObject({ origin_code: 'EARTH' });
-    expect(data.race_code).toBeNull();
-    expect(data.ship_ID).toBeNull();
+    expect(draftData).toMatchObject({ origin_code: 'EARTH' });
+    expect(draftData.race_code).toBeNull();
+    expect(draftData.ship_ID).toBeNull();
   });
 
   test('returns only spacefarers whose names match the search term', async () => {
     const uniqueName = `SearchNeedle${crypto.randomUUID()}`;
-    const search = uniqueName.slice(0, -2);
+    const searchPrefix = uniqueName.slice(0, -2);
 
-    await createSpacefarer({
+    await createAndActivateSpacefarer({
       name: uniqueName, email: 'needle@demo.io', race_code: 'Terran',
       origin_code: 'EARTH',
       ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
       stardustCollected: 500
     });
-    await createSpacefarer({
+    await createAndActivateSpacefarer({
       name: 'OtherHero', email: 'other@demo.io', race_code: 'Terran',
       origin_code: 'EARTH',
       ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
       stardustCollected: 500
     });
 
-    const { data } = await GET(`/galaxy/Spacefarers?$search=${search}&$select=name`,
+    const { data: searchResults } = await GET(`/galaxy/Spacefarers?$search=${searchPrefix}&$select=name`,
       { auth: { username: 'terran-admin', password: 'admin' } });
 
-    expect(data.value.map(row => row.name)).toEqual([uniqueName]);
+    expect(searchResults.value.map(spacefarer => spacefarer.name)).toEqual([uniqueName]);
   }, 15000);
 
   test('allows admin draft activation when draft origin matches the signed-in planet', async () => {
-    const activated = await createSpacefarer({
+    const activationResponse = await createAndActivateSpacefarer({
       name: 'Nova', email: 'nova@demo.io', race_code: 'Terran',
       origin_code: 'EARTH',
       ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
       stardustCollected: 500
     });
 
-    expect(activated.status).toBeLessThan(300);
-    expect(activated.data).toMatchObject({
+    expect(activationResponse.status).toBeLessThan(300);
+    expect(activationResponse.data).toMatchObject({
       name: 'Nova',
       origin_code: 'EARTH'
     });
   }, 15000);
 
   test('returns 403 when an admin activates a draft for a different planet', async () => {
-    const draft = await POST('/galaxy/Spacefarers', {
+    const draftCreationResponse = await POST('/galaxy/Spacefarers', {
       name: 'Vex', email: 'v@py.io', race_code: 'Terran',
       origin_code: 'ZERG',
       ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
       stardustCollected: 1500
     }, { auth: { username: 'terran-admin', password: 'admin' } });
 
-    const { ID } = draft.data;
+    const { ID: draftId } = draftCreationResponse.data;
     await expect(POST(
-      `/galaxy/Spacefarers(ID=${ID},IsActiveEntity=false)/GalaxyService.draftActivate`,
+      `/galaxy/Spacefarers(ID=${draftId},IsActiveEntity=false)/GalaxyService.draftActivate`,
       {}, { auth: { username: 'terran-admin', password: 'admin' } }
     )).rejects.toMatchObject({ response: { status: 403 } });
   }, 15000);
