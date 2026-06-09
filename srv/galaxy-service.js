@@ -1,16 +1,11 @@
 const cds = require('@sap/cds');
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const TIERS = ['Novice', 'Adept', 'Expert', 'Master'];
 const THRESHOLDS = [0, 100, 1000, 10000];
 
 function validateAndPromote(s, req) {
   if (s.stardustCollected != null && s.stardustCollected < 0)
     return req.reject(400, 'stardustCollected must be >= 0');
-
-  if (s.email != null && !EMAIL_RE.test(s.email))
-    return req.reject(400, 'Invalid email format');
 
   if (s.stardustCollected != null) {
     let minTier = 0;
