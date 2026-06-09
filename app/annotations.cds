@@ -9,11 +9,11 @@ annotate service.Spacefarers with @(
     },
     LineItem: [
       { Value: name },
-      { Value: race_code },
-      { Value: origin_code,        Label: 'Origin' },
+      { Value: race.name,          Label: 'Race' },
+      { Value: origin.name,        Label: 'Origin' },
       { Value: ship.name },
       { Value: stardustCollected,  Label: 'Stardust' },
-      { Value: wormholeSkill_code, Label: 'Wormhole Skill' },
+      { Value: wormholeSkill.name, Label: 'Wormhole Skill' },
       { Value: position.title }
     ],
     SelectionFields: [
@@ -38,20 +38,20 @@ annotate service.Spacefarers with @(
     FieldGroup #Commander: { Data: [
       { Value: name },
       { Value: email },
-      { Value: race_code },
-      { Value: origin_code },
-      { Value: suitColor_code }
+      { Value: race.name,      Label: 'Race' },
+      { Value: origin.name,    Label: 'Origin Planet' },
+      { Value: suitColor.name, Label: 'Suit Color' }
     ]},
     FieldGroup #Ship: { Data: [
-      { Value: ship_ID },
+      { Value: ship.name,           Label: 'Ship' },
       { Value: stardustCollected,   Label: 'Stardust' },
-      { Value: wormholeSkill_code,  Label: 'Wormhole Skill' },
+      { Value: wormholeSkill.name,  Label: 'Wormhole Skill' },
       { Value: ship.hullHardening,  Label: 'Ship Hull Hardening' },
       { Value: ship.capacity,       Label: 'Ship Capacity' }
     ]},
     FieldGroup #Organization: { Data: [
-      { Value: department_ID },
-      { Value: position_ID },
+      { Value: department.name, Label: 'Department' },
+      { Value: position.title,  Label: 'Position' },
       { Value: position.rank }
     ]}
   }
