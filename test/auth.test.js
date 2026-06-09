@@ -12,13 +12,13 @@ async function createSpacefarer (entry) {
   );
 }
 
-describe('GalaxyService authorization', () => {
-  test('rejects anonymous users', async () => {
+describe('GalaxyService authorization and planet isolation', () => {
+  test('returns 401 when an unauthenticated user reads spacefarers', async () => {
     await expect(GET('/galaxy/Spacefarers'))
       .rejects.toMatchObject({ response: { status: 401 } });
   });
 
-  test('isolates planet value help by logged-in planet', async () => {
+  test('returns only the signed-in planet in Planets value help', async () => {
     const terran = await GET('/galaxy/Planets',
       { auth: { username: 'terran-admin', password: 'admin' } });
     const zerg = await GET('/galaxy/Planets',
@@ -32,7 +32,7 @@ describe('GalaxyService authorization', () => {
     ]);
   });
 
-  test('draft creation only pre-fills origin planet', async () => {
+  test('pre-fills only origin_code from the signed-in user planet when creating a draft', async () => {
     const { data } = await POST('/galaxy/Spacefarers', {},
       { auth: { username: 'terran-admin', password: 'admin' } });
 
@@ -41,7 +41,7 @@ describe('GalaxyService authorization', () => {
     expect(data.ship_ID).toBeNull();
   });
 
-  test('search filters hero names', async () => {
+  test('returns only spacefarers whose names match the search term', async () => {
     const uniqueName = `SearchNeedle${crypto.randomUUID()}`;
     const search = uniqueName.slice(0, -2);
 
@@ -64,7 +64,7 @@ describe('GalaxyService authorization', () => {
     expect(data.value.map(row => row.name)).toEqual([uniqueName]);
   }, 15000);
 
-  test('allows admins to activate spacefarers for their own planet', async () => {
+  test('allows admin draft activation when draft origin matches the signed-in planet', async () => {
     const activated = await createSpacefarer({
       name: 'Nova', email: 'nova@demo.io', race_code: 'Terran',
       origin_code: 'EARTH',
@@ -79,7 +79,7 @@ describe('GalaxyService authorization', () => {
     });
   }, 15000);
 
-  test('rejects admin activation for another planet', async () => {
+  test('returns 403 when an admin activates a draft for a different planet', async () => {
     const draft = await POST('/galaxy/Spacefarers', {
       name: 'Vex', email: 'v@py.io', race_code: 'Terran',
       origin_code: 'ZERG',
@@ -94,7 +94,7 @@ describe('GalaxyService authorization', () => {
     )).rejects.toMatchObject({ response: { status: 403 } });
   }, 15000);
 
-  test('rejects creates from read-only users', async () => {
+  test('returns 403 when a read-only user creates a spacefarer draft', async () => {
     await expect(POST('/galaxy/Spacefarers', {
       name: 'X', email: 'x@demo.io', race_code: 'Zerg',
       origin_code: 'ZERG',

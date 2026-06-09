@@ -5,7 +5,7 @@ cds.test(__dirname + '/..');
 const asAdmin = (fn) =>
   cds.tx({ user: new cds.User({ id: 'terran-admin', roles: ['admin'], attr: { planet: 'EARTH' } }) }, fn);
 
-test('SpacefarerEnlisted emitted on CREATE', async () => {
+test('emits SpacefarerEnlisted after a spacefarer is created', async () => {
   const galaxy = await cds.connect.to('GalaxyService');
   const messaging = await cds.connect.to('messaging');
 

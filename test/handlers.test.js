@@ -5,12 +5,12 @@ cds.test(__dirname + '/..');
 const asAdmin = (fn) =>
   cds.tx({ user: new cds.User({ id: 'terran-admin', roles: ['admin'], attr: { planet: 'EARTH' } }) }, fn);
 
-describe('@Before CREATE handler', () => {
+describe('Spacefarer creation', () => {
 
   let srv;
   beforeAll(async () => { srv = await cds.connect.to('GalaxyService'); });
 
-  test('rejects negative stardust', async () => {
+  test('rejects spacefarer creation when stardustCollected is negative', async () => {
     await expect(asAdmin(() =>
       srv.create('Spacefarers').entries({
         name: 'Bad', email: 'b@px.io', race_code: 'Terran',
@@ -21,7 +21,7 @@ describe('@Before CREATE handler', () => {
     )).rejects.toThrow(/stardustCollected/);
   });
 
-  test('zero stardust receives starter fuel grant', async () => {
+  test('grants starter stardust when stardustCollected is omitted', async () => {
     const row = await asAdmin(() =>
       srv.create('Spacefarers').entries({
         name: 'Zara', email: 'z@px.io', race_code: 'Protoss',
@@ -32,7 +32,7 @@ describe('@Before CREATE handler', () => {
     expect(row.stardustCollected).toBe(50);
   });
 
-  test('1500 stardust promotes Novice → Expert', async () => {
+  test('promotes wormhole skill to Expert when stardustCollected is 1500', async () => {
     const row = await asAdmin(() =>
       srv.create('Spacefarers').entries({
         name: 'Rex', email: 'r@px.io', race_code: 'Terran',
