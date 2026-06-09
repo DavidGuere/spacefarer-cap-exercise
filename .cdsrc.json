@@ -6,9 +6,9 @@
         "terran-admin": { "password": "admin", "roles": ["admin"], "attr": { "planet": "EARTH" } },
         "zerg-admin":   { "password": "admin", "roles": ["admin"], "attr": { "planet": "ZERG" } },
         "protos-admin": { "password": "admin", "roles": ["admin"], "attr": { "planet": "PROTOS" } },
-        "terran-user":  { "password": "user",  "roles": [],        "attr": { "planet": "EARTH" } },
-        "zerg-user":    { "password": "user",  "roles": [],        "attr": { "planet": "ZERG" } },
-        "protos-user":  { "password": "user",  "roles": [],        "attr": { "planet": "PROTOS" } }
+        "terran-user":  { "password": "user",  "roles": ["viewer"], "attr": { "planet": "EARTH" } },
+        "zerg-user":    { "password": "user",  "roles": ["viewer"], "attr": { "planet": "ZERG" } },
+        "protos-user":  { "password": "user",  "roles": ["viewer"], "attr": { "planet": "PROTOS" } }
       }
     },
     "db":        { "kind": "sqlite", "credentials": { "url": "db.sqlite" } },

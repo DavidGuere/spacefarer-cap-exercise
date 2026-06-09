@@ -1,0 +1,55 @@
+{
+  "xsappname": "galactic-spacefarer",
+  "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://starcraft-spacefarer.com/**"
+    ],
+    "token-validity": 3600,
+    "refresh-token-validity": 43200
+  },
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.viewer",
+      "description": "Read spacefarers from assigned planet"
+    },
+    {
+      "name": "$XSAPPNAME.admin",
+      "description": "Create, update, and delete spacefarers on assigned planet"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "planet",
+      "description": "Origin planet code — controls which spacefarers this user can access",
+      "valueType": "string",
+      "allowedValues": ["EARTH", "ZERG", "PROTOS"]
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "SpacefarerViewer",
+      "description": "Read-only access to spacefarers on assigned planet",
+      "scope-references": ["$XSAPPNAME.viewer"],
+      "attribute-references": ["planet"]
+    },
+    {
+      "name": "SpacefarerAdmin",
+      "description": "Full access to spacefarers on assigned planet",
+      "scope-references": ["$XSAPPNAME.admin"],
+      "attribute-references": ["planet"]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "GalacticViewers",
+      "description": "Grants read-only spacefarer access",
+      "role-template-references": ["$XSAPPNAME.SpacefarerViewer"]
+    },
+    {
+      "name": "GalacticAdmins",
+      "description": "Grants full spacefarer management access",
+      "role-template-references": ["$XSAPPNAME.SpacefarerAdmin"]
+    }
+  ]
+}

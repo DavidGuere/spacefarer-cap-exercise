@@ -1,5 +1,16 @@
 const cds = require('@sap/cds');
+const crypto = require('crypto');
 const { GET, POST } = cds.test(__dirname + '/..');
+
+async function createSpacefarer (entry) {
+  const draft = await POST('/galaxy/Spacefarers', entry,
+    { auth: { username: 'terran-admin', password: 'admin' } });
+
+  return POST(
+    `/galaxy/Spacefarers(ID=${draft.data.ID},IsActiveEntity=false)/GalaxyService.draftActivate`,
+    {}, { auth: { username: 'terran-admin', password: 'admin' } }
+  );
+}
 
 describe('GalaxyService authorization', () => {
   test('rejects anonymous users', async () => {
@@ -30,18 +41,36 @@ describe('GalaxyService authorization', () => {
     expect(data.ship_ID).toBeNull();
   });
 
+  test('search filters hero names', async () => {
+    const uniqueName = `SearchNeedle${crypto.randomUUID()}`;
+    const search = uniqueName.slice(0, -2);
+
+    await createSpacefarer({
+      name: uniqueName, email: 'needle@demo.io', race_code: 'Terran',
+      origin_code: 'EARTH',
+      ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
+      stardustCollected: 500
+    });
+    await createSpacefarer({
+      name: 'OtherHero', email: 'other@demo.io', race_code: 'Terran',
+      origin_code: 'EARTH',
+      ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
+      stardustCollected: 500
+    });
+
+    const { data } = await GET(`/galaxy/Spacefarers?$search=${search}&$select=name`,
+      { auth: { username: 'terran-admin', password: 'admin' } });
+
+    expect(data.value.map(row => row.name)).toEqual([uniqueName]);
+  }, 15000);
+
   test('allows admins to activate spacefarers for their own planet', async () => {
-    const draft = await POST('/galaxy/Spacefarers', {
+    const activated = await createSpacefarer({
       name: 'Nova', email: 'nova@demo.io', race_code: 'Terran',
       origin_code: 'EARTH',
       ship_ID: '11111111-aaaa-bbbb-cccc-111111111111',
       stardustCollected: 500
-    }, { auth: { username: 'terran-admin', password: 'admin' } });
-
-    const activated = await POST(
-      `/galaxy/Spacefarers(ID=${draft.data.ID},IsActiveEntity=false)/GalaxyService.draftActivate`,
-      {}, { auth: { username: 'terran-admin', password: 'admin' } }
-    );
+    });
 
     expect(activated.status).toBeLessThan(300);
     expect(activated.data).toMatchObject({

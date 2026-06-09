@@ -1,12 +1,12 @@
 using { galactic as my } from '../db/schema';
 
 @path: '/galaxy'
-service GalaxyService @(requires: 'authenticated-user') {
+service GalaxyService @(requires: ['viewer', 'admin']) {
 
   @odata.draft.enabled
   @restrict: [
     { grant: 'READ',
-      to: 'authenticated-user',
+      to: ['viewer', 'admin'],
       where: 'origin.code = $user.planet' },
     { grant: ['CREATE','UPDATE','DELETE'],
       to: 'admin',
@@ -17,7 +17,7 @@ service GalaxyService @(requires: 'authenticated-user') {
   @readonly entity Races        as projection on my.Races;
   @readonly @restrict: [
     { grant: 'READ',
-      to: 'authenticated-user',
+      to: ['viewer', 'admin'],
       where: 'code = $user.planet' }
   ]
   entity Planets as projection on my.Planets;
