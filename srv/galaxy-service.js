@@ -1,5 +1,28 @@
 const cds = require('@sap/cds');
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const TIERS = ['Novice', 'Adept', 'Expert', 'Master'];
+const THRESHOLDS = [0, 100, 1000, 10000];
+
+function validateAndPromote(s, req) {
+  if (s.stardustCollected != null && s.stardustCollected < 0)
+    return req.reject(400, 'stardustCollected must be >= 0');
+
+  if (s.email != null && !EMAIL_RE.test(s.email))
+    return req.reject(400, 'Invalid email format');
+
+  if (s.stardustCollected != null) {
+    let minTier = 0;
+    for (let i = 0; i < THRESHOLDS.length; i++) {
+      if (s.stardustCollected >= THRESHOLDS[i]) minTier = i;
+    }
+    const supplied = TIERS.indexOf(s.wormholeSkill_code);
+    const supplyIdx = supplied < 0 ? 0 : supplied;
+    s.wormholeSkill_code = TIERS[Math.max(minTier, supplyIdx)];
+  }
+}
+
 module.exports = cds.service.impl(async function () {
   const { Spacefarers } = this.entities;
 
@@ -38,21 +61,16 @@ module.exports = cds.service.impl(async function () {
     }
 
     if (s.stardustCollected == null) s.stardustCollected = 0;
-    if (s.stardustCollected < 0) return req.reject(400, 'stardustCollected must be >= 0');
-
     if (s.stardustCollected === 0) s.stardustCollected = 50;
 
-    const tiers = ['Novice', 'Adept', 'Expert', 'Master'];
-    const thresholds = [0, 100, 1000, 10000];
-    let minTier = 0;
-    for (let i = 0; i < thresholds.length; i++) {
-      if (s.stardustCollected >= thresholds[i]) minTier = i;
-    }
-    const supplied = tiers.indexOf(s.wormholeSkill_code);
-    const supplyIdx = supplied < 0 ? 0 : supplied;
-    s.wormholeSkill_code = tiers[Math.max(minTier, supplyIdx)];
+    const result = validateAndPromote(s, req);
+    if (result) return result;
 
     s.enlistedAt = new Date().toISOString();
+  });
+
+  this.before('UPDATE', Spacefarers, (req) => {
+    return validateAndPromote(req.data, req);
   });
 
   this.after('CREATE', Spacefarers, async (created) => {

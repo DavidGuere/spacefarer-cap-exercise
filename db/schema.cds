@@ -45,7 +45,7 @@ entity SkillLevels : CodeList {
 
 entity Spacefarers : cuid, managed {
   name                         : String(100) @mandatory;
-  email                        : String(255) @mandatory;
+  email                        : String(255) @mandatory @assert.format: '^[^\s@]+@[^\s@]+\.[^\s@]+$';
   race                         : Association to Races      @mandatory;
   origin                       : Association to Planets    @mandatory;
   ship                         : Association to Starships  @mandatory;
