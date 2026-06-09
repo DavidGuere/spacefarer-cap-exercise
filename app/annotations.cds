@@ -14,6 +14,7 @@ annotate service.Spacefarers with @(
       { Value: ship.name },
       { Value: stardustCollected,  Label: 'Stardust' },
       { Value: wormholeSkill.name, Label: 'Wormhole Skill' },
+      { Value: suitColor.name,    Label: 'Suit Color' },
       { Value: position.title }
     ],
     SelectionFields: [
